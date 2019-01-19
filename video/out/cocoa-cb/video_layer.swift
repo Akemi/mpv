@@ -71,6 +71,42 @@ class VideoLayer: CAOpenGLLayer {
         mpv.initRender()
         mpv.setRenderUpdateCallback(updateCallback, context: self)
         mpv.setRenderControlCallback(cocoaCB.controlCallback, context: cocoaCB)
+
+        print("----NotificationCenter")
+        NSWorkspace.shared().notificationCenter.addObserver(
+            self,
+            selector: #selector(self._reduceTransparencyChanged(_:)),
+            name: NSNotification.Name.NSWorkspaceAccessibilityDisplayOptionsDidChange,
+            object: NSWorkspace.shared())
+
+        var filter = CIFilter(name: "CIColorInvert")
+
+        let colorMatrix = CIFilter(name: "CIColorMatrix")
+        colorMatrix!.setDefaults()
+        colorMatrix!.setValue(CIVector(x: -1.0, y: 0, z: 0, w: 0), forKey: "inputRVector")
+        colorMatrix!.setValue(CIVector(x: 0, y: -1.0, z: 0, w: 0), forKey: "inputGVector")
+        colorMatrix!.setValue(CIVector(x: 0, y: 0, z: -1.0, w: 0), forKey: "inputBVector")
+        colorMatrix!.setValue(CIVector(x: 1.0, y: 1.0, z: 1.0, w: 0), forKey: "inputBiasVector")
+        colorMatrix!.setValue(CIVector(x: 0, y: 0, z: 0, w: 1.0), forKey: "inputAVector")
+
+
+
+
+        //colorspace = NSColorSpace.sRGB.cgColorSpace!
+        //self.filters = [colorMatrix]
+        //cocoaCB.window.colorSpace = nil
+        //self.compositingFilter = [ CIFilter(name: "CIAdditionCompositing") ]
+    }
+
+    @objc private func _reduceTransparencyChanged(_ notification: Notification?) {
+        /*colorspace = NSColorSpace.sRGB.cgColorSpace!
+        cocoaCB.window.colorSpace = NSColorSpace.sRGB
+        print("reduceTransparencyChanged \(notification) \(colorspace) \(cocoaCB.window.colorSpace)")
+        let work = notification!.object as! NSWorkspace
+        if #available(macOS 10.12, *) {
+            print("reduceTransparencyChanged \(work.accessibilityDisplayShouldInvertColors)")
+        }*/
+        //print("test \(note)")
     }
 
     override init(layer: Any) {
