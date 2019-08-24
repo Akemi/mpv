@@ -15,7 +15,7 @@ def __add_swift_flags(ctx):
     ctx.env.SWIFT_FLAGS = [
         "-frontend", "-c", "-sdk", ctx.env.MACOS_SDK,
         "-enable-objc-interop", "-emit-objc-header", "-parse-as-library",
-        "-target", "x86_64-apple-macosx10.10"
+        "-target", "x86_64-apple-macosx10.11"
     ]
 
     verRe = re.compile("(?i)version\s?([\d.]+)")

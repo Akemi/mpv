@@ -171,6 +171,10 @@ def build(ctx):
             ( "video/out/cocoa-cb/window.swift" ),
             ( "video/out/cocoa-cb/title_bar.swift" ),
             ( "video/out/cocoa_cb_common.swift" ),
+            #molten swift
+            ( "video/out/macos_common.swift" ),
+            ( "video/out/macos/metal_view.swift" ),
+            ( "video/out/macos/metal_window.swift" ),
         ]
 
         ctx(
@@ -503,6 +507,7 @@ def build(ctx):
         ( "video/out/vulkan/context_wayland.c",  "vulkan && wayland" ),
         ( "video/out/vulkan/context_win.c",      "vulkan && win32-desktop" ),
         ( "video/out/vulkan/context_xlib.c",     "vulkan && x11" ),
+        ( "video/out/vulkan/context_macos.m",    "vulkan && cocoa" ),
         ( "video/out/vulkan/utils.c",            "vulkan" ),
         ( "video/out/w32_common.c",              "win32-desktop" ),
         ( "video/out/wayland/idle-inhibit-v1.c", "wayland" ),
