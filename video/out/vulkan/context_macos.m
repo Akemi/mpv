@@ -26,17 +26,17 @@
 
 struct priv {
     struct mpvk_ctx vk;
-    MacOSCommon *vo_macos;
+    MacosCommon *vo_macos;
 };
 
 
 static void macos_vk_uninit(struct ra_ctx *ctx)
 {
-    /*struct priv *p = ctx->priv;
+    struct priv *p = ctx->priv;
 
     ra_vk_ctx_uninit(ctx);
     mpvk_uninit(&p->vk);
-    vo_macos_uninit(ctx->vo);*/
+    [p->vo_macos uninit:ctx->vo];
 }
 
 static bool macos_vk_init(struct ra_ctx *ctx)
@@ -48,15 +48,15 @@ static bool macos_vk_init(struct ra_ctx *ctx)
     if (!mpvk_init(vk, ctx, VK_MVK_MACOS_SURFACE_EXTENSION_NAME))
         goto error;
 
-    p->vo_macos = [[MacOSCommon alloc] init:ctx->vo];
-
-    [p->vo_macos config:ctx->vo];
+    p->vo_macos = [[MacosCommon alloc] init:ctx->vo];
+    if (!p->vo_macos)
+        goto error;
 
     VkMacOSSurfaceCreateInfoMVK macos_info = {
         .sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK,
         .pNext = NULL,
         .flags = 0,
-        .pView = p->vo_macos.view,
+        .pView = p->vo_macos.video,
     };
 
     VkInstance inst = vk->vkinst->instance;
@@ -70,9 +70,7 @@ static bool macos_vk_init(struct ra_ctx *ctx)
     if (!ra_vk_ctx_init(ctx, vk, VK_PRESENT_MODE_IMMEDIATE_KHR))
         goto error;
 
-    /*if (!vo_macos_init(ctx->vo))
-        goto error;
-
+    /*
     ra_add_native_resource(ctx->ra, "wl", ctx->vo->wl->display);*/
 
     return true;
@@ -84,7 +82,7 @@ error:
 
 static bool resize(struct ra_ctx *ctx)
 {
-    return ra_vk_ctx_resize(ctx, 1280, 720);
+    return ra_vk_ctx_resize(ctx, 1024, 574);
 
     /*struct vo_macos_state *wl = ctx->vo->wl;
 
@@ -108,24 +106,25 @@ static bool macos_vk_reconfig(struct ra_ctx *ctx)
 static int macos_vk_control(struct ra_ctx *ctx, int *events, int request, void *arg)
 {
     struct priv *p = ctx->priv;
-    int ret = [p->vo_macos control:ctx->vo];
+    int ret = [p->vo_macos control:ctx->vo events:events request:request arg:arg];
 
-    /*int ret = vo_macos_control(ctx->vo, events, request, arg);
     if (*events & VO_EVENT_RESIZE) {
         if (!resize(ctx))
             return VO_ERROR;
     }
-    */
+
     return ret;
 }
 
 static void macos_vk_wakeup(struct ra_ctx *ctx)
 {
+    //printf("macos_vk_wakeup");
     //vo_macos_wakeup(ctx->vo);
 }
 
 static void macos_vk_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
 {
+    //printf("macos_vk_wait_events");
     //vo_macos_wait_events(ctx->vo, until_time_us);
 }
 

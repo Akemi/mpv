@@ -175,6 +175,9 @@ def build(ctx):
             ( "video/out/macos_common.swift" ),
             ( "video/out/macos/metal_view.swift" ),
             ( "video/out/macos/metal_window.swift" ),
+            ( "video/out/macos/metal_events.swift" ),
+            ( "video/out/macos/title_bar.swift" ),
+            ( "osdep/macos/mpv_helper.swift" ),
         ]
 
         ctx(

@@ -21,12 +21,6 @@ import OpenGL.GL3
 
 let glDummy: @convention(c) () -> Void = {}
 
-extension Bool {
-    init(_ num: Int32) {
-        self.init(num > 0)
-    }
-}
-
 class MPVHelper: NSObject {
 
     var mpvHandle: OpaquePointer?

@@ -19,13 +19,35 @@ import Cocoa
 
 class MetalView: NSView {
 
-    override var wantsUpdateLayer: Bool { return true  }
+    weak var common: Common! = nil
+
+    override var wantsUpdateLayer: Bool { return true }
+
+    init(common com: Common) {
+        common = com
+        super.init(frame: NSMakeRect(0, 0, 960, 480))
+        autoresizingMask = [.width, .height]
+        wantsLayer = true
+        layerContentsPlacement = .scaleProportionallyToFit
+        //layerContentsRedrawPolicy = .duringViewResize
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func makeBackingLayer() -> CALayer {
         let layer = CAMetalLayer()
+        //layer.framebufferOnly = false
+        //layer.drawableSize = NSSize(width: 1024, height: 576)
         //layer.pixelFormat = .rgba16Float
 
         return layer
     }
 
+    func canHideCursor() -> Bool {
+        return true
+        //guard let window = cocoaCB.window else { return false }
+        //return !hasMouseDown && containsMouseLocation() && window.isKeyWindow
+    }
 }

@@ -19,22 +19,57 @@ import Cocoa
 
 class MetalWindow: NSWindow, NSWindowDelegate {
 
+    //unowned var common: Common
+    weak var common: Common! = nil
+    var mpv: MPVHelper2 { get { return common.mpv } }
+
     var targetScreen: NSScreen?
-    //var previousScreen: NSScreen?
+    var previousScreen: NSScreen?
     var currentScreen: NSScreen?
     var unfScreen: NSScreen?
 
     var unfsContentFrame: NSRect?
-    //var isInFullscreen: Bool = false
-    //var isAnimating: Bool = false
-    //var isMoving: Bool = false
-    //var forceTargetScreen: Bool = false
+    var isInFullscreen: Bool = false
+    var isAnimating: Bool = false
+    var isMoving: Bool = false
+    var forceTargetScreen: Bool = false
+    var unfsContentFramePixel: NSRect { get { return convertToBacking(unfsContentFrame ?? NSRect(x: 0, y: 0, width: 160, height: 90)) } }
+
+    var keepAspect: Bool = true {
+        didSet {
+            if let contentViewFrame = contentView?.frame, !isInFullscreen {
+                unfsContentFrame = convertToScreen(contentViewFrame)
+            }
+
+            if keepAspect {
+                contentAspectRatio = unfsContentFrame?.size ?? contentAspectRatio
+            } else {
+                resizeIncrements = NSSize(width: 1.0, height: 1.0)
+            }
+        }
+    }
+
+    var border: Bool = true {
+        didSet { if !border { common.titleBar?.hide() } }
+    }
 
     override var canBecomeKey: Bool { return true }
     override var canBecomeMain: Bool { return true }
 
+    override var styleMask: NSWindow.StyleMask {
+        get { return super.styleMask }
+        set {
+            let responder = firstResponder
+            let windowTitle = title
+            super.styleMask = newValue
+            makeFirstResponder(responder)
+            title = windowTitle
+        }
+    }
 
-    convenience init(contentRect: NSRect, screen: NSScreen?, view: NSView/*, cocoaCB ccb: CocoaCB*/) {
+
+
+    convenience init(contentRect: NSRect, screen: NSScreen?, view: NSView, common com: Common) {
         self.init(contentRect: contentRect,
                   styleMask: [.titled, .closable, .miniaturizable, .resizable],
                   backing: .buffered, defer: false, screen: screen)
@@ -51,8 +86,8 @@ class MetalWindow: NSWindow, NSWindowDelegate {
             }
         }
 
-        //cocoaCB = ccb
-        //title = cocoaCB.title
+        common = com
+        title = com.title
         minSize = NSMakeSize(160, 90)
         collectionBehavior = .fullScreenPrimary
         delegate = self
@@ -76,50 +111,6 @@ class MetalWindow: NSWindow, NSWindowDelegate {
         }
     }
 
-    @objc func setNormalWindowSize() { setWindowScale(1.0) }
-    @objc func setHalfWindowSize()   { setWindowScale(0.5) }
-    @objc func setDoubleWindowSize() { setWindowScale(2.0) }
-
-
-    func setWindowScale(_ scale: Double) {
-        //mpv.commandAsync(["osd-auto", "set", "window-scale", "\(scale)"])
-    }
-
-
-
-    /*var cocoaCB: CocoaCB! = nil
-    var mpv: MPVHelper { get { return cocoaCB.mpv } }
-
-
-    var keepAspect: Bool = true {
-        didSet {
-            if let contentViewFrame = contentView?.frame, !isInFullscreen {
-                unfsContentFrame = convertToScreen(contentViewFrame)
-            }
-
-            if keepAspect {
-                contentAspectRatio = unfsContentFrame?.size ?? contentAspectRatio
-            } else {
-                resizeIncrements = NSSize(width: 1.0, height: 1.0)
-            }
-        }
-    }
-
-    var border: Bool = true {
-        didSet { if !border { cocoaCB.titleBar?.hide() } }
-    }
-
-    override var styleMask: NSWindow.StyleMask {
-        get { return super.styleMask }
-        set {
-            let responder = firstResponder
-            let windowTitle = title
-            super.styleMask = newValue
-            makeFirstResponder(responder)
-            title = windowTitle
-        }
-    }
-
     override func toggleFullScreen(_ sender: Any?) {
         if isAnimating {
             return
@@ -127,7 +118,7 @@ class MetalWindow: NSWindow, NSWindowDelegate {
 
         isAnimating = true
 
-        targetScreen = cocoaCB.getTargetScreen(forFullscreen: !isInFullscreen)
+        targetScreen = common.getTargetScreen(forFullscreen: !isInFullscreen)
         if targetScreen == nil && previousScreen == nil {
             targetScreen = screen
         } else if targetScreen == nil {
@@ -147,7 +138,7 @@ class MetalWindow: NSWindow, NSWindowDelegate {
             setFrame(frame, display: true)
         }
 
-        if mpv.getBoolProperty("native-fs") {
+        if Bool(mpv.opts.native_fs) {
             super.toggleFullScreen(sender)
         } else {
             if !isInFullscreen {
@@ -169,8 +160,8 @@ class MetalWindow: NSWindow, NSWindowDelegate {
 
     func window(_ window: NSWindow, startCustomAnimationToEnterFullScreenWithDuration duration: TimeInterval) {
         guard let tScreen = targetScreen else { return }
-        cocoaCB.view?.layerContentsPlacement = .scaleProportionallyToFit
-        cocoaCB.titleBar?.hide()
+        common.view?.layerContentsPlacement = .scaleProportionallyToFit
+        common.titleBar?.hide()
         NSAnimationContext.runAnimationGroup({ (context) -> Void in
             context.duration = getFsAnimationDuration(duration - 0.05)
             window.animator().setFrame(tScreen.frame, display: true)
@@ -181,8 +172,8 @@ class MetalWindow: NSWindow, NSWindowDelegate {
         guard let tScreen = targetScreen, let currentScreen = screen else { return }
         let newFrame = calculateWindowPosition(for: tScreen, withoutBounds: tScreen == screen)
         let intermediateFrame = aspectFit(rect: newFrame, in: currentScreen.frame)
-        cocoaCB.view?.layerContentsPlacement = .scaleProportionallyToFill
-        cocoaCB.titleBar?.hide()
+        common.view?.layerContentsPlacement = .scaleProportionallyToFill
+        common.titleBar?.hide()
         styleMask.remove(.fullScreen)
         setFrame(intermediateFrame, display: true)
 
@@ -194,18 +185,18 @@ class MetalWindow: NSWindow, NSWindowDelegate {
 
     func windowDidEnterFullScreen(_ notification: Notification) {
         isInFullscreen = true
-        cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
-        cocoaCB.updateCusorVisibility()
+        common.flagEvents(VO_EVENT_FULLSCREEN_STATE)
+        common.updateCusorVisibility()
         endAnimation(frame)
-        cocoaCB.titleBar?.show()
+        common.titleBar?.show()
     }
 
     func windowDidExitFullScreen(_ notification: Notification) {
         guard let tScreen = targetScreen else { return }
         isInFullscreen = false
-        cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
+        common.flagEvents(VO_EVENT_FULLSCREEN_STATE)
         endAnimation(calculateWindowPosition(for: tScreen, withoutBounds: targetScreen == screen))
-        cocoaCB.view?.layerContentsPlacement = .scaleProportionallyToFit
+        common.view?.layerContentsPlacement = .scaleProportionallyToFit
     }
 
     func windowDidFailToEnterFullScreen(_ window: NSWindow) {
@@ -219,7 +210,7 @@ class MetalWindow: NSWindow, NSWindowDelegate {
         guard let targetFrame = targetScreen?.frame else { return }
         setFrame(targetFrame, display: true)
         endAnimation()
-        cocoaCB.view?.layerContentsPlacement = .scaleProportionallyToFit
+        common.view?.layerContentsPlacement = .scaleProportionallyToFit
     }
 
     func endAnimation(_ newFrame: NSRect = NSZeroRect) {
@@ -231,8 +222,8 @@ class MetalWindow: NSWindow, NSWindowDelegate {
         }
 
         isAnimating = false
-        cocoaCB.layer?.update()
-        cocoaCB.checkShutdown()
+        //common.layer?.update()
+        //common.checkShutdown()
     }
 
     func setToFullScreen() {
@@ -242,8 +233,8 @@ class MetalWindow: NSWindow, NSWindowDelegate {
         setFrame(targetFrame, display: true)
         endAnimation()
         isInFullscreen = true
-        cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
-        cocoaCB.layer?.update()
+        common.flagEvents(VO_EVENT_FULLSCREEN_STATE)
+        //common.layer?.update()
     }
 
     func setToWindow() {
@@ -254,16 +245,16 @@ class MetalWindow: NSWindow, NSWindowDelegate {
         styleMask.remove(.fullScreen)
         endAnimation()
         isInFullscreen = false
-        cocoaCB.flagEvents(VO_EVENT_FULLSCREEN_STATE)
-        cocoaCB.layer?.update()
+        common.flagEvents(VO_EVENT_FULLSCREEN_STATE)
+        //common.layer?.update()
     }
 
     func getFsAnimationDuration(_ def: Double) -> Double{
-        let duration = mpv.getStringProperty("macos-fs-animation-duration") ?? "default"
-        if duration == "default" {
+        let duration = mpv.macOpts.macos_fs_animation_duration
+        if duration < 0 {
             return def
         } else {
-            return (Double(duration) ?? 0.2)/1000
+            return Double(duration)/1000
         }
     }
 
@@ -456,6 +447,15 @@ class MetalWindow: NSWindow, NSWindowDelegate {
         return nf
     }
 
+    @objc func setNormalWindowSize() { setWindowScale(1.0) }
+    @objc func setHalfWindowSize()   { setWindowScale(0.5) }
+    @objc func setDoubleWindowSize() { setWindowScale(2.0) }
+
+
+    func setWindowScale(_ scale: Double) {
+        //mpv.commandAsync(["osd-auto", "set", "window-scale", "\(scale)"])
+    }
+
     func windowDidChangeScreen(_ notification: Notification) {
         if screen == nil {
             return
@@ -464,25 +464,25 @@ class MetalWindow: NSWindow, NSWindowDelegate {
             previousScreen = screen
         }
         if currentScreen != screen {
-            cocoaCB.updateDisplaylink()
+            common.updateDisplaylink()
         }
         currentScreen = screen
     }
 
     func windowDidChangeScreenProfile(_ notification: Notification) {
-        cocoaCB.layer?.needsICCUpdate = true
+        //common.layer?.needsICCUpdate = true
     }
 
     func windowDidChangeBackingProperties(_ notification: Notification) {
-        cocoaCB.layer?.contentsScale = backingScaleFactor
+        //common.layer?.contentsScale = backingScaleFactor
     }
 
     func windowWillStartLiveResize(_ notification: Notification) {
-        cocoaCB.layer?.inLiveResize = true
+        //common.layer?.inLiveResize = true
     }
 
     func windowDidEndLiveResize(_ notification: Notification) {
-        cocoaCB.layer?.inLiveResize = false
+        //common.layer?.inLiveResize = false
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
@@ -491,28 +491,28 @@ class MetalWindow: NSWindow, NSWindowDelegate {
     }
 
     func windowDidMiniaturize(_ notification: Notification) {
-        cocoaCB.flagEvents(VO_EVENT_WIN_STATE)
+        common.flagEvents(VO_EVENT_WIN_STATE)
     }
 
     func windowDidDeminiaturize(_ notification: Notification) {
-        cocoaCB.flagEvents(VO_EVENT_WIN_STATE)
+        common.flagEvents(VO_EVENT_WIN_STATE)
     }
 
     func windowDidResignKey(_ notification: Notification) {
-        cocoaCB.setCursorVisiblility(true)
+        common.setCursorVisiblility(true)
     }
 
     func windowDidBecomeKey(_ notification: Notification) {
-        cocoaCB.updateCusorVisibility()
+        common.updateCusorVisibility()
     }
 
     func windowDidChangeOcclusionState(_ notification: Notification) {
         if occlusionState.contains(.visible) {
-            cocoaCB.layer?.update(force: true)
+            //common.layer?.update(force: true)
         }
     }
 
     func windowWillMove(_ notification: Notification) {
         isMoving = true
-    }*/
+    }
 }
