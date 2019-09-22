@@ -452,9 +452,8 @@ class MetalWindow: NSWindow, NSWindowDelegate {
     @objc func setHalfWindowSize()   { setWindowScale(0.5) }
     @objc func setDoubleWindowSize() { setWindowScale(2.0) }
 
-
     func setWindowScale(_ scale: Double) {
-        //mpv.commandAsync(["osd-auto", "set", "window-scale", "\(scale)"])
+        mpv.command("set window-scale \(scale)")
     }
 
     func windowDidChangeScreen(_ notification: Notification) {

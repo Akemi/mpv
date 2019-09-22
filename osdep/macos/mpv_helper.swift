@@ -63,6 +63,13 @@ class MPVHelper: NSObject {
         mp_input_put_wheel(input, mpkey, delta)
     }
 
+    func command(_ cmd: String) {
+        let cCmd = UnsafePointer<Int8>(strdup(cmd))
+        let mpvCmd = mp_input_parse_cmd(input, bstr0(cCmd), "")
+        mp_input_queue_cmd(input, mpvCmd);
+        free(UnsafeMutablePointer(mutating: cCmd))
+    }
+
     func sendVerbose(_ msg: String) {
         send(message: msg, type: MSGL_V)
     }

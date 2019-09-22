@@ -40,14 +40,11 @@ class MetalView: NSView {
         let layer = CAMetalLayer()
         //layer.framebufferOnly = false
         //layer.drawableSize = NSSize(width: 1024, height: 576)
-        //layer.pixelFormat = .rgba16Float
+        layer.pixelFormat = .rgba16Float
+        if #available(macOS 10.13, *) {
+            layer.displaySyncEnabled = true
+        }
 
         return layer
-    }
-
-    func canHideCursor() -> Bool {
-        return true
-        //guard let window = cocoaCB.window else { return false }
-        //return !hasMouseDown && containsMouseLocation() && window.isKeyWindow
     }
 }
