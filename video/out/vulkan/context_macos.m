@@ -82,17 +82,11 @@ error:
 
 static bool resize(struct ra_ctx *ctx)
 {
-    return ra_vk_ctx_resize(ctx, 1024, 574);
+    //return ra_vk_ctx_resize(ctx, 1024, 574);
 
-    /*struct vo_macos_state *wl = ctx->vo->wl;
+    printf("resize..... %d %d", ctx->vo->dwidth, ctx->vo->dheight);
 
-    MP_VERBOSE(wl, "Handling resize on the vk side\n");
-
-    const int32_t width = wl->scaling*mp_rect_w(wl->geometry);
-    const int32_t height = wl->scaling*mp_rect_h(wl->geometry);
-
-    wl_surface_set_buffer_scale(wl->surface, wl->scaling);
-    return ra_vk_ctx_resize(ctx, width, height);*/
+    return ra_vk_ctx_resize(ctx, ctx->vo->dwidth, ctx->vo->dheight);
 }
 
 static bool macos_vk_reconfig(struct ra_ctx *ctx)

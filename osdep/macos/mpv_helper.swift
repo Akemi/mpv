@@ -20,7 +20,10 @@ import Cocoa
 class MPVHelper: NSObject {
 
     var vo: UnsafeMutablePointer<vo>
-    var vout: vo { get { return vo.pointee } }
+    var vout: vo {
+        get { return vo.pointee }
+        set { vo.pointee = newValue }
+    }
     var opts: mp_vo_opts { get { return vout.opts.pointee } }
     var input: OpaquePointer { get { return vout.input_ctx } }
     var log: OpaquePointer

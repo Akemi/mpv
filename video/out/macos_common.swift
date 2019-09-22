@@ -35,6 +35,7 @@ protocol Common: class {
     func updateCusorVisibility()
     func setCursorVisiblility(_ visible: Bool)
     func updateDisplaylink()
+    func updateRenderSize(_ size: NSSize)
 }
 
 class MacosCommon: NSObject, Common {
@@ -135,6 +136,9 @@ class MacosCommon: NSObject, Common {
                 print("----update window size")
                 window?.updateSize(wr.size)
             }
+
+            mpv.vout.dwidth = Int32(wr.size.width)
+            mpv.vout.dheight = Int32(wr.size.height)
 
 
             window?.setOnTop(Bool(mpv.opts.ontop), Int(mpv.opts.ontop_level))
@@ -584,6 +588,12 @@ class MacosCommon: NSObject, Common {
 
     func updateCusorVisibility() {
         setCursorVisiblility(cursorVisibilityWanted)
+    }
+
+    func updateRenderSize(_ size: NSSize) {
+        mpv.vout.dwidth = Int32(size.width)
+        mpv.vout.dheight = Int32(size.height)
+        flagEvents(VO_EVENT_RESIZE | VO_EVENT_EXPOSE)
     }
 
 

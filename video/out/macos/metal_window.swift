@@ -34,6 +34,7 @@ class MetalWindow: NSWindow, NSWindowDelegate {
     var isMoving: Bool = false
     var forceTargetScreen: Bool = false
     var unfsContentFramePixel: NSRect { get { return convertToBacking(unfsContentFrame ?? NSRect(x: 0, y: 0, width: 160, height: 90)) } }
+    var framePixel: NSRect { get { return convertToBacking(frame) } }
 
     var keepAspect: Bool = true {
         didSet {
@@ -483,6 +484,17 @@ class MetalWindow: NSWindow, NSWindowDelegate {
 
     func windowDidEndLiveResize(_ notification: Notification) {
         //common.layer?.inLiveResize = false
+    }
+
+    func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
+        print("---window will resize")
+        common.updateRenderSize(frameSize)
+        return frameSize
+    }
+
+    func windowDidResize(_ notification: Notification) {
+        print("---window did resize")
+        common.updateRenderSize(framePixel.size)
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
