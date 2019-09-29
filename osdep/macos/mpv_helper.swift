@@ -17,20 +17,17 @@
 
 import Cocoa
 
-class MPVHelper2: NSObject {
+class MPVHelper: NSObject {
 
     var vo: UnsafeMutablePointer<vo>
     var vout: vo { get { return vo.pointee } }
     var opts: mp_vo_opts { get { return vout.opts.pointee } }
     var input: OpaquePointer { get { return vout.input_ctx } }
     var log: OpaquePointer
-    var name: String
     var macOpts: macos_opts = macos_opts()
 
     init(_ vo: UnsafeMutablePointer<vo>, _ name: String) {
         self.vo = vo
-        self.name = name
-
         log = mp_log_new(vo, vo.pointee.log, name)
 
         super.init()
@@ -49,6 +46,10 @@ class MPVHelper2: NSObject {
     func canBeDraggedAt(_ pos: NSPoint) -> Bool {
         let canDrag = !mp_input_test_dragging(input, Int32(pos.x), Int32(pos.y))
         return canDrag
+    }
+
+    func mouseEnabled() -> Bool {
+        return mp_input_mouse_enabled(input)
     }
 
     func setMousePosition(_ pos: NSPoint) {
