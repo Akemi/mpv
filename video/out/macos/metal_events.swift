@@ -20,7 +20,7 @@ import Cocoa
 class MetalEvents: NSView {
 
     weak var common: Common! = nil
-    var mpv: MPVHelper2 { get { return common.mpv } }
+    var mpv: MPVHelper { get { return common.mpv } }
 
     var tracker: NSTrackingArea?
     var hasMouseDown: Bool = false
@@ -117,64 +117,64 @@ class MetalEvents: NSView {
     }
 
     override func mouseEntered(with event: NSEvent) {
-        if mp_input_mouse_enabled(mpv.input) {
+        if mpv.mouseEnabled() {
             cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_ENTER, 0)
         }
     }
 
     override func mouseExited(with event: NSEvent) {
-        if mp_input_mouse_enabled(mpv.input) {
+        if mpv.mouseEnabled() {
             cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_LEAVE, 0)
         }
         common.titleBar?.hide()
     }
 
     override func mouseMoved(with event: NSEvent) {
-        if mp_input_mouse_enabled(mpv.input) {
+        if mpv.mouseEnabled() {
             signalMouseMovement(event)
         }
         common.titleBar?.show()
     }
 
     override func mouseDragged(with event: NSEvent) {
-        if mp_input_mouse_enabled(mpv.input) {
+        if mpv.mouseEnabled() {
             signalMouseMovement(event)
         }
     }
 
     override func mouseDown(with event: NSEvent) {
-        if mp_input_mouse_enabled(mpv.input) {
+        if mpv.mouseEnabled() {
             signalMouseDown(event)
         }
     }
 
     override func mouseUp(with event: NSEvent) {
-        if mp_input_mouse_enabled(mpv.input) {
+        if mpv.mouseEnabled() {
             signalMouseUp(event)
         }
         common.window?.isMoving = false
     }
 
     override func rightMouseDown(with event: NSEvent) {
-        if mp_input_mouse_enabled(mpv.input) {
+        if mpv.mouseEnabled() {
             signalMouseDown(event)
         }
     }
 
     override func rightMouseUp(with event: NSEvent) {
-        if mp_input_mouse_enabled(mpv.input) {
+        if mpv.mouseEnabled() {
             signalMouseUp(event)
         }
     }
 
     override func otherMouseDown(with event: NSEvent) {
-        if mp_input_mouse_enabled(mpv.input) {
+        if mpv.mouseEnabled() {
             signalMouseDown(event)
         }
     }
 
     override func otherMouseUp(with event: NSEvent) {
-        if mp_input_mouse_enabled(mpv.input) {
+        if mpv.mouseEnabled() {
             signalMouseUp(event)
         }
     }
@@ -223,7 +223,7 @@ class MetalEvents: NSView {
     }
 
     override func scrollWheel(with event: NSEvent) {
-        if !mp_input_mouse_enabled(mpv.input) {
+        if !mpv.mouseEnabled() {
             return
         }
 

@@ -21,7 +21,7 @@ class MetalWindow: NSWindow, NSWindowDelegate {
 
     //unowned var common: Common
     weak var common: Common! = nil
-    var mpv: MPVHelper2 { get { return common.mpv } }
+    var mpv: MPVHelper { get { return common.mpv } }
 
     var targetScreen: NSScreen?
     var previousScreen: NSScreen?
@@ -259,33 +259,23 @@ class MetalWindow: NSWindow, NSWindowDelegate {
         }
     }
 
-    func setOnTop(_ state: Bool, _ ontopLevel: Any) {
-        let stdLevel: NSWindow.Level = .normal
-
+    func setOnTop(_ state: Bool, _ ontopLevel: Int) {
         if state {
-            if ontopLevel is Int {
-                switch ontopLevel as? Int {
-                case .some(-1):
-                    level = .floating
-                case .some(-2):
-                    level = .statusBar + 1
-                default:
-                    level = NSWindow.Level(ontopLevel as? Int ?? stdLevel.rawValue)
-                }
-            } else {
-                switch ontopLevel as? String {
-                case .some("window"):
-                    level = .floating
-                case .some("system"):
-                    level = .statusBar + 1
-                default:
-                    level = NSWindow.Level(Int(ontopLevel as? String ?? "") ?? stdLevel.rawValue)
-                }
+            switch ontopLevel {
+            case -1:
+                print("case -1 \(ontopLevel)")
+                level = .floating
+            case -2:
+                print("case -2 \(ontopLevel)")
+                level = .statusBar + 1
+            default:
+                print("default \(ontopLevel)")
+                level = NSWindow.Level(ontopLevel)
             }
             collectionBehavior.remove(.transient)
             collectionBehavior.insert(.managed)
         } else {
-            level = stdLevel
+            level = .normal
         }
     }
 

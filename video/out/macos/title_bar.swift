@@ -20,7 +20,7 @@ import Cocoa
 class TitleBar2: NSVisualEffectView {
 
     weak var common: Common! = nil
-    var mpv: MPVHelper2 { get { return common.mpv } }
+    var mpv: MPVHelper { get { return common.mpv } }
 
     var systemBar: NSView? {
         get { return common.window?.standardWindowButton(.closeButton)?.superview }

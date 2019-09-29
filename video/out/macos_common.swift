@@ -23,7 +23,7 @@ protocol Common: class {
     var video: MetalView? { get }
     var titleBar: TitleBar2? { get }
     //var view: EventsView?
-    var mpv: MPVHelper2 { get }
+    var mpv: MPVHelper { get }
 
     var cursorHidden: Bool { get }
     var cursorVisibilityWanted: Bool { get }
@@ -44,7 +44,7 @@ class MacosCommon: NSObject, Common {
     var view: MetalEvents?
     var window: MetalWindow?
     var titleBar: TitleBar2?
-    var mpv: MPVHelper2
+    var mpv: MPVHelper
     var link: CVDisplayLink?
 
     var cursorHidden: Bool = false
@@ -67,7 +67,7 @@ class MacosCommon: NSObject, Common {
 
     // functions called by context
     @objc init(_ vo: UnsafeMutablePointer<vo>) {
-        mpv = MPVHelper2(vo, "mac")
+        mpv = MPVHelper(vo, "mac")
         super.init()
 
         DispatchQueue.main.sync {
@@ -405,7 +405,7 @@ class MacosCommon: NSObject, Common {
                 return kCVReturnSuccess
             }
         } else {
-            CVDisplayLinkSetOutputCallback(link, linkCallback, MPVHelper2.bridge(obj: self))
+            CVDisplayLinkSetOutputCallback(link, linkCallback, MPVHelper.bridge(obj: self))
         }
         CVDisplayLinkStart(link)
     }
@@ -502,7 +502,7 @@ class MacosCommon: NSObject, Common {
         lightSensorIOPort = IONotificationPortCreate(kIOMasterPortDefault)
         IONotificationPortSetDispatchQueue(lightSensorIOPort, queue)
         var n = io_object_t()
-        IOServiceAddInterestNotification(lightSensorIOPort, srv, kIOGeneralInterest, lightSensorCallback, MPVHelper2.bridge(obj: self), &n)
+        IOServiceAddInterestNotification(lightSensorIOPort, srv, kIOGeneralInterest, lightSensorCallback, MPVHelper.bridge(obj: self), &n)
         let kr = IOServiceOpen(srv, mach_task_self_, 0, &lightSensor)
         IOObjectRelease(srv)
 
@@ -510,7 +510,7 @@ class MacosCommon: NSObject, Common {
             mpv.sendVerbose("Can't start ambient light sensor connection")
             return
         }
-        lightSensorCallback(MPVHelper2.bridge(obj: self), 0, 0, nil)
+        lightSensorCallback(MPVHelper.bridge(obj: self), 0, 0, nil)
     }
 
     func uninitLightSensor() {
@@ -533,11 +533,11 @@ class MacosCommon: NSObject, Common {
     }
 
     func addDisplayReconfigureObserver() {
-        CGDisplayRegisterReconfigurationCallback(reconfigureCallback, MPVHelper2.bridge(obj: self))
+        CGDisplayRegisterReconfigurationCallback(reconfigureCallback, MPVHelper.bridge(obj: self))
     }
 
     func removeDisplayReconfigureObserver() {
-        CGDisplayRemoveReconfigurationCallback(reconfigureCallback, MPVHelper2.bridge(obj: self))
+        CGDisplayRemoveReconfigurationCallback(reconfigureCallback, MPVHelper.bridge(obj: self))
     }
 
     func checkEvents() -> Int {
