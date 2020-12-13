@@ -184,6 +184,7 @@ class Window: NSWindow, NSWindowDelegate {
     func windowDidEnterFullScreen(_ notification: Notification) {
         isInFullscreen = true
         mpv?.setOption(fullscreen: isInFullscreen)
+        print("windowDidEnterFullScreen")
         common.updateCursorVisibility()
         endAnimation(frame)
         common.titleBar?.show()
@@ -527,16 +528,19 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func windowDidResignKey(_ notification: Notification) {
+        print("windowDidResignKey")
         common.setCursorVisiblility(true)
     }
 
     func windowDidBecomeKey(_ notification: Notification) {
+        print("windowDidBecomeKey")
         common.updateCursorVisibility()
     }
 
     func windowDidChangeOcclusionState(_ notification: Notification) {
         if occlusionState.contains(.visible) {
             common.windowDidChangeOcclusionState()
+            print("windowDidChangeOcclusionState")
             common.updateCursorVisibility()
         }
     }

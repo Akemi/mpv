@@ -61,6 +61,13 @@ class Common: NSObject {
         addDisplayReconfigureObserver()
         addAppNotifications()
         mpv.setMacOptionCallback(macOptsWakeupCallback, context: self)
+
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.activeSpaceDidChangeNotification,
+            object: nil,
+            queue: .main) { [weak self] (notification) in
+                print("activeSpaceDidChangeNotification")
+        }
     }
 
     func initApp() {
@@ -387,10 +394,12 @@ class Common: NSObject {
     }
 
     func updateCursorVisibility() {
+        print("updateCursorVisibility \(cursorVisibilityWanted)")
         setCursorVisiblility(cursorVisibilityWanted)
     }
 
     func setCursorVisiblility(_ visible: Bool) {
+        print("setCursorVisiblility setHiddenUntilMouseMoves \(!visible && (view?.canHideCursor() ?? false)) -- visible \(visible) canHideCursor \(view?.canHideCursor() ?? false)")
         NSCursor.setHiddenUntilMouseMoves(!visible && (view?.canHideCursor() ?? false))
     }
 
@@ -584,6 +593,7 @@ class Common: NSObject {
         case VOCTRL_SET_CURSOR_VISIBILITY:
             let cursorVisibility = data.assumingMemoryBound(to: CBool.self)
             cursorVisibilityWanted = cursorVisibility.pointee
+            print("VOCTRL_SET_CURSOR_VISIBILITY \(cursorVisibilityWanted)")
             DispatchQueue.main.async {
                 self.setCursorVisiblility(self.cursorVisibilityWanted)
             }

@@ -119,6 +119,7 @@ class View: NSView {
         if mpv?.mouseEnabled() ?? true {
             cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_ENTER, 0)
         }
+        print("mouseEntered")
         common.updateCursorVisibility()
     }
 
@@ -127,6 +128,7 @@ class View: NSView {
             cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_LEAVE, 0)
         }
         common.titleBar?.hide()
+        print("mouseExited")
         common.setCursorVisiblility(true)
     }
 
@@ -280,6 +282,7 @@ class View: NSView {
 
     func canHideCursor() -> Bool {
         guard let window = common.window else { return false }
+        print("canHideCursor \(!hasMouseDown && containsMouseLocation() && window.isKeyWindow) -- hasMouseDown \(hasMouseDown) containsMouseLocation \(containsMouseLocation()) isKeyWindow \(window.isKeyWindow)")
         return !hasMouseDown && containsMouseLocation() && window.isKeyWindow
     }
 
