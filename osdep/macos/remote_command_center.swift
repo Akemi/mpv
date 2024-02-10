@@ -97,6 +97,8 @@ class RemoteCommandCenter: NSObject {
     }
 
     @objc func start() {
+        print("----- start \(Thread.current) \(OperationQueue.current?.underlyingQueue?.label ?? "None")")
+
         for (cmd, _) in config {
             cmd.isEnabled = true
             cmd.addTarget { [unowned self] event in
@@ -105,12 +107,27 @@ class RemoteCommandCenter: NSObject {
         }
 
         if let app = NSApp as? Application, let icon = app.getMPVIcon() {
-            let albumArt = MPMediaItemArtwork(boundsSize: icon.size) { _ in
-                return icon
+            let albumArt = MPMediaItemArtwork(boundsSize: icon.size) { size in
+                print("----- MPMediaItemArtwork \(size) \(Thread.current) \(OperationQueue.current?.underlyingQueue?.label ?? "None")")
+
+                let frame = self.aspectFit(size: icon.size, target: size)
+                guard let representation = icon.bestRepresentation(for: frame, context: nil, hints: nil) else {
+                    return NSImage(size: size)
+                }
+                let image = NSImage(size: size, flipped: false, drawingHandler: { (rect) -> Bool in
+                    print("----- MPMediaItemArtwork0 \(rect)")
+                    return representation.draw(in: self.aspectFit(size: representation.size, target: rect.size))
+                })
+
+                print("----- MPMediaItemArtwork1 \(icon)")
+                print("----- MPMediaItemArtwork2 \(image)")
+
+                return image
             }
             nowPlayingInfo[MPMediaItemPropertyArtwork] = albumArt
         }
 
+        print("----- start update info")
         mpInfoCenter.nowPlayingInfo = nowPlayingInfo
         mpInfoCenter.playbackState = .playing
 
@@ -120,9 +137,20 @@ class RemoteCommandCenter: NSObject {
             name: NSApplication.willBecomeActiveNotification,
             object: nil
         )
+        print("----- start end")
+    }
+
+    func aspectFit(size: NSSize, target: NSSize) -> NSRect {
+        var scale = target.width / size.width
+        if size.height * scale > target.height {
+            scale = target.height / size.height
+        }
+
+        return NSRect(x: 0, y: 0, width: size.width * scale, height: size.height * scale)
     }
 
     @objc func stop() {
+        print("----- stop \(Thread.current) \(OperationQueue.current?.underlyingQueue?.label ?? "None")")
         for (cmd, _) in config {
             cmd.isEnabled = false
             cmd.removeTarget(nil)
@@ -130,16 +158,22 @@ class RemoteCommandCenter: NSObject {
 
         mpInfoCenter.nowPlayingInfo = nil
         mpInfoCenter.playbackState = .unknown
+        print("----- stop end")
     }
 
     @objc func makeCurrent(notification: NSNotification) {
+        print("----- makeCurrent \(Thread.current) \(OperationQueue.current?.underlyingQueue?.label ?? "None")")
         mpInfoCenter.playbackState = .paused
         mpInfoCenter.playbackState = .playing
+        print("----- makeCurrent updatePlaybackState")
         updatePlaybackState()
+        print("----- makeCurrent end")
     }
 
     func updatePlaybackState() {
+        print("----- updatePlaybackState \(Thread.current) \(OperationQueue.current?.underlyingQueue?.label ?? "None")")
         mpInfoCenter.playbackState = isPaused ? .paused : .playing
+        print("----- updatePlaybackState end")
     }
 
     func cmdHandler(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
