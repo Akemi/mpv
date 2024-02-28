@@ -61,6 +61,8 @@
 #include "osdep/windows_utils.h"
 #endif
 
+#include <dispatch/dispatch.h>
+
 
 struct osd_entry {
     pl_tex tex;
@@ -902,6 +904,8 @@ static void update_tm_viz(struct pl_color_map_params *params,
 
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
+    dispatch_sync(dispatch_get_main_queue(), ^{
+
     struct priv *p = vo->priv;
     pl_options pars = p->pars;
     pl_gpu gpu = p->gpu;
@@ -1131,20 +1135,27 @@ done:
 
     pl_gpu_flush(gpu);
     p->frame_pending = true;
+    });
 }
 
 static void flip_page(struct vo *vo)
 {
+    //dispatch_sync(dispatch_get_main_queue(), ^{
     struct priv *p = vo->priv;
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
 
     if (p->frame_pending) {
-        if (!pl_swapchain_submit_frame(p->sw))
+        __block bool ret;
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            ret = pl_swapchain_submit_frame(p->sw);
+        });
+        if (!ret)
             MP_ERR(vo, "Failed presenting frame!\n");
         p->frame_pending = false;
     }
 
     sw->fns->swap_buffers(sw);
+    //});
 }
 
 static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
