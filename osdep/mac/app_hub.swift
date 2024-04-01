@@ -51,19 +51,28 @@ class AppHub: NSObject {
     }
 
     @objc func initMpv(_ mpv: OpaquePointer) {
-        log.log = mp_log_new(UnsafeMutablePointer(mpv), mp_client_get_log(mpv), "app")
-        option = OptionHelper(UnsafeMutablePointer(mpv), mp_client_get_global(mpv))
-        input.option = option
+        print("-------- initMpv1")
         event = EventHelper(self, mpv)
-        self.mpv = event?.mpv
+        print("-------- initMpv2")
+        if let mpv = event?.mpv {
+            print("-------- initMpv2.1")
+            self.mpv = mpv
+            log.log = mp_log_new(UnsafeMutablePointer(mpv), mp_client_get_log(mpv), "app")
+            option = OptionHelper(UnsafeMutablePointer(mpv), mp_client_get_global(mpv))
+            input.option = option
+        }
 
 #if HAVE_MACOS_MEDIA_PLAYER
+        print("-------- initMpv3.1")
         remote?.registerEvents()
 #endif
 #if HAVE_MACOS_TOUCHBAR
+        print("-------- initMpv3.2")
         touchBar = TouchBar(self)
 #endif
+        print("-------- initMpv4")
         log.verbose("AppHub functionality initialised")
+        print("-------- initMpv5")
     }
 
     @objc func initInput(_ input: OpaquePointer?) {

@@ -50,12 +50,16 @@ class LogHelper {
     }
 
     func send(message: String, type: Int) {
-        guard let log = log, UnsafeRawPointer(log).load(as: UInt8.self) != 0 else {
+        print("------- send(message:)0 \(message)")
+        guard let log = log/*, UnsafeRawPointer(log).load(as: UInt8.self) != 0*/ else {
+            print("------- send(message:)1")
             logger.log(level: loggerMapping[type] ?? .default, "\(message, privacy: .public)")
+            print("------- send(message:)2")
             return
         }
-
+        print("------- send(message:)1.1")
         let args: [CVarArg] = [(message as NSString).utf8String ?? "NO MESSAGE"]
         mp_msg_va(log, Int32(type), "%s\n", getVaList(args))
+        print("------- send(message:)1.2")
     }
 }

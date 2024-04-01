@@ -66,7 +66,9 @@ class EventHelper {
 
     init?(_ appHub: AppHub, _ mpv: OpaquePointer) {
         if !appHub.isApplication {
+            print("------- mpv_destroy(mpv)")
             mpv_destroy(mpv)
+            print("------- mpv_destroy(mpv)2")
             return nil
         }
 
