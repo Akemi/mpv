@@ -1,7 +1,7 @@
 name: "Request a new Feature"
 description: "Create a request for a new feature"
 labels: ["meta:feature-request"]
-type: Feature
+#type: Feature
 body:
 - type: textarea
   id: expected_behavior
