@@ -303,8 +303,9 @@ jobs:
             brew update
           fi
           if brew list ffmpeg &> /dev/null; then brew unlink ffmpeg; fi
+          brew install --HEAD libplacebo
           brew install -q autoconf automake pkgconf libtool python freetype fribidi little-cms2 \
-            luajit libass ffmpeg-full meson rust uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers \
+            luajit libass ffmpeg-full meson rust uchardet mujs molten-vk vulkan-loader vulkan-headers \
             libarchive libbluray libcaca libcdio-paranoia libdvdnav rubberband zimg
           brew link ffmpeg-full
 
