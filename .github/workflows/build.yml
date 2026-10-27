@@ -379,13 +379,15 @@ jobs:
             cd "$(brew --repo homebrew/core)"
             git fetch --depth=1 origin ${{ matrix.homebrew }}
             git checkout --force ${{ matrix.homebrew }}
+            brew install -q --HEAD libplacebo
           else
             brew update
+            brew install -q libplacebo
           fi
           if brew list ffmpeg &> /dev/null; then brew unlink ffmpeg; fi
           if brew list openssl@1.1 &> /dev/null; then brew rm openssl@1.1; fi
           brew install -q autoconf automake curl pkgconf libtool python freetype fribidi little-cms2 \
-            luajit libass ffmpeg-full meson rust uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers \
+            luajit libass ffmpeg-full meson rust uchardet mujs molten-vk vulkan-loader vulkan-headers \
             libarchive libbluray libcaca libcdio-paranoia libdvdnav libdvdread libsixel rubberband vapoursynth zimg
           brew link ffmpeg-full
 
