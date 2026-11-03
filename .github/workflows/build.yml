@@ -355,6 +355,7 @@ jobs:
             target: "10.15"
           - os: "xcode-27"
             target-os: "macos-27-arm"
+            xcode: "Xcode_27.2"
     steps:
       - uses: actions/checkout@v7
 
