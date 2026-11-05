@@ -393,7 +393,7 @@ jobs:
             libarchive libbluray libcaca libcdio-paranoia libdvdnav libdvdread libsixel rubberband vapoursynth zimg
           brew install -q --HEAD libplacebo
           brew install -q --HEAD ffmpeg-full
-          brew link ffmpeg-full
+          brew link libplacebo ffmpeg-full
 
       - name: Build with meson
         id: build
