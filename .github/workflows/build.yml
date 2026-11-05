@@ -391,7 +391,9 @@ jobs:
           brew install -q autoconf automake curl pkgconf libtool python freetype fribidi little-cms2 \
             luajit libass meson rust uchardet mujs molten-vk vulkan-loader vulkan-headers \
             libarchive libbluray libcaca libcdio-paranoia libdvdnav libdvdread libsixel rubberband vapoursynth zimg
+          brew install -q --only-dependencies libplacebo
           brew install -q --HEAD libplacebo
+          brew deps ffmpeg-full | grep -v "^libplacebo$" | xargs brew install -q
           brew install -q --HEAD ffmpeg-full
           brew link --overwrite libplacebo ffmpeg-full
 
